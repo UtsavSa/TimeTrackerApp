@@ -1,12 +1,15 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { HeaderComponent } from './header/header.component';
+import { ToastrModule } from 'ngx-toastr';
+import { DashboardComponent } from './dashboard.component';
+import { FormsModule } from '@angular/forms'; // ✅ Import FormsModule
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterModule, HeaderComponent, ToastrModule,FormsModule,  DashboardComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
 })
-export class AppComponent {
-  title = 'time-tracker-app';
-}
+export class AppComponent {}

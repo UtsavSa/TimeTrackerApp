@@ -29,6 +29,7 @@
             "styles": [
               "src/styles.css"
             ],
+            
             "scripts": []
           },
           "configurations": {
@@ -92,5 +93,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "111c54e9-bfa7-4f0d-b470-c12704e30926"
   }
 }

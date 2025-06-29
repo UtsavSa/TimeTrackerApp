@@ -1,0 +1,35 @@
+<div class="p-6">
+  <h1 class="text-3xl font-bold mb-6 text-gray-900">Sprint Planning Board</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Column -->
+    <div *ngFor="let status of taskStatuses" class="bg-gray-50 rounded-2xl p-4 shadow-sm border border-gray-200">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800 capitalize">{{ status.replace('-', ' ') }}</h2>
+
+      <!-- Task Card -->
+      <div
+        *ngFor="let task of getTasksByStatus(status)"
+        class="bg-white rounded-xl p-4 mb-4 shadow hover:shadow-lg transition-all border border-gray-100"
+      >
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-bold text-gray-900 truncate">{{ task.name }}</h3>
+          <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+            {{ task.storyPoints }} pts
+          </span>
+        </div>
+        <p class="text-sm text-gray-600 mt-1 mb-2 line-clamp-3">{{ task.description }}</p>
+        <div class="text-sm text-gray-700">
+          <p>⏱ Hours: <span class="font-medium">{{ task.hoursTaken }}</span> / {{ task.hoursNeeded }}</p>
+        </div>
+      </div>
+
+      <!-- Add Task Card -->
+      <button
+        (click)="openTaskModal(status)"
+        class="w-full mt-2 flex items-center justify-center text-blue-600 hover:text-blue-800 text-sm py-2 rounded-xl border border-dashed border-blue-400 hover:bg-blue-50 transition"
+      >
+        + Add Task
+      </button>
+    </div>
+  </div>
+</div>

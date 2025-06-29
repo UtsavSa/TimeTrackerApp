@@ -1,0 +1,100 @@
+<div class="max-w-xl mx-auto mt-10 p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-xl rounded-2xl transition-colors duration-300">
+
+  <!-- Header and Delete All -->
+  <div class="mb-4 border-b border-gray-300 dark:border-gray-600 pb-2 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold">Time Tracker</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Track your work in real-time</p>
+    </div>
+    <button
+      class="text-sm px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700"
+      (click)="deleteAllEntries()"
+    >
+      Delete All
+    </button>
+  </div>
+
+  <!-- Live Timer -->
+  <div class="text-center text-3xl font-mono text-blue-600 my-4">
+    {{ liveTimer }}
+  </div>
+
+  <!-- Task Input -->
+  <input
+    type="text"
+    [(ngModel)]="taskName"
+    placeholder="What are you working on?"
+    [disabled]="!!activeEntry"
+    class="w-full px-4 py-2 mb-4 border border-gray-300 dark:border-gray-600 rounded-lg 
+           bg-white dark:bg-gray-700 
+           text-gray-900 dark:text-white 
+           placeholder:text-gray-400 dark:placeholder:text-gray-500
+           focus:outline-none focus:ring focus:border-blue-400 
+           disabled:bg-gray-100 dark:disabled:bg-gray-800"
+  />
+
+  <!-- Punch Buttons -->
+  <div class="flex gap-4 mb-4">
+    <button
+      (click)="punchIn()"
+      [disabled]="!!activeEntry"
+      class="w-1/2 py-2 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-300"
+    >
+      Punch In
+    </button>
+    <button
+      (click)="punchOut()"
+      [disabled]="!activeEntry"
+      class="w-1/2 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-300"
+    >
+      Punch Out
+    </button>
+  </div>
+
+  <!-- Toggle Task History -->
+  <button
+    class="text-blue-600 dark:text-blue-400 text-sm underline mb-4"
+    (click)="toggleTaskDetails()"
+  >
+    {{ showTaskDetails ? 'Hide Task History' : 'Show Task History' }}
+  </button>
+
+  <!-- Task History Table -->
+  <div *ngIf="showTaskDetails" class="overflow-x-auto">
+    <h2 class="text-lg font-semibold mb-2">📜 Task History</h2>
+    <table class="w-full text-sm text-left border border-gray-300 dark:border-gray-700">
+      <thead class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+        <tr>
+          <th class="p-2 border dark:border-gray-600">Task</th>
+          <th class="p-2 border dark:border-gray-600">Punch In</th>
+          <th class="p-2 border dark:border-gray-600">Punch Out</th>
+          <th class="p-2 border dark:border-gray-600">Duration</th>
+          <th class="p-2 border dark:border-gray-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let entry of entries" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+          <td class="p-2 border dark:border-gray-600">{{ entry.taskName }}</td>
+          <td class="p-2 border dark:border-gray-600">
+            {{ entry.punchInTime | date: 'short' }}
+          </td>
+          <td class="p-2 border dark:border-gray-600">
+            {{ entry.punchOutTime ? (entry.punchOutTime | date: 'short') : '—' }}
+          </td>
+          <td class="p-2 border dark:border-gray-600">
+            {{ getDuration(entry.punchInTime, entry.punchOutTime) }}
+          </td>
+          <td class="p-2 border dark:border-gray-600">
+            <button
+              (click)="deleteEntry(entry.id!)"
+              [disabled]="activeEntry?.id === entry.id"
+              class="px-2 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded disabled:opacity-50"
+            >
+              Remove
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

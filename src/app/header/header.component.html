@@ -2,12 +2,19 @@
   <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
     <!-- Tabs -->
     <nav class="flex space-x-4">
-      <a href="#" class="text-gray-700 dark:text-gray-200 font-semibold hover:text-blue-500">Home</a>
-      <a routerLink="/dashboard" routerLinkActive="font-bold text-blue-600">Dashboard</a>
+      <a routerLink="/home" routerLinkActive="font-bold text-blue-600" class="text-gray-700 dark:text-gray-200 font-semibold hover:text-blue-500">Home</a>
+      <a routerLink="/dashboard" routerLinkActive="font-bold text-blue-600" class="text-gray-700 dark:text-gray-200 font-semibold hover:text-blue-500">Dashboard</a>
+      <a routerLink="/puncher" routerLinkActive="font-bold text-blue-600" class="text-gray-700 dark:text-gray-200 font-semibold hover:text-blue-500">Puncher</a>
+      <a routerLink="/about" class="text-gray-700 dark:text-gray-200 font-semibold hover:text-blue-500">About</a>
 
-      <a href="#" class="text-gray-700 dark:text-gray-200 font-semibold hover:text-blue-500">About</a>
-      <a routerLink="/puncher" routerLinkActive="active">Puncher</a> <!-- 👈 new tab -->
-
+      <!-- Auth buttons -->
+      <ng-container *ngIf="!isLoggedIn(); else logoutBtn">
+        <a routerLink="/login" class="text-gray-700 dark:text-gray-200 font-semibold hover:text-blue-500">Login</a>
+        <a routerLink="/register" class="text-gray-700 dark:text-gray-200 font-semibold hover:text-blue-500">Register</a>
+      </ng-container>
+      <ng-template #logoutBtn>
+        <button (click)="logout()" class="text-red-600 font-semibold hover:underline">Logout</button>
+      </ng-template>
     </nav>
 
     <!-- Dark Mode Toggle -->

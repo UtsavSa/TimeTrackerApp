@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../services/authService.service';
 
 @Component({
   selector: 'app-header',
@@ -10,6 +11,8 @@ import { RouterModule } from '@angular/router';
 })
 export class HeaderComponent implements OnInit {
   isDarkMode = false;
+
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.isDarkMode = localStorage.getItem('theme') === 'dark';
@@ -27,5 +30,14 @@ export class HeaderComponent implements OnInit {
     this.isDarkMode
       ? html.classList.add('dark')
       : html.classList.remove('dark');
+  }
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

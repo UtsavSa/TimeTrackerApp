@@ -1,35 +1,94 @@
-<div class="p-6">
-  <h1 class="text-3xl font-bold mb-6 text-gray-900">Sprint Planning Board</h1>
+<div class="p-6 text-gray-900 dark:text-gray-100">
+  <h1 class="text-3xl font-bold mb-8 text-center">🗂️ Sprint Planning Board</h1>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Column -->
-    <div *ngFor="let status of taskStatuses" class="bg-gray-50 rounded-2xl p-4 shadow-sm border border-gray-200">
-      <h2 class="text-xl font-semibold mb-4 text-gray-800 capitalize">{{ status.replace('-', ' ') }}</h2>
+    <!-- Columns -->
+    <div
+      *ngFor="let status of taskStatuses"
+      class="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-lg border border-gray-200 dark:border-gray-700"
+    >
+      <h2 class="text-xl font-semibold mb-4 capitalize text-blue-700 dark:text-blue-400">
+        {{ status.replace('-', ' ') }}
+      </h2>
 
-      <!-- Task Card -->
+      <!-- Task Cards -->
       <div
         *ngFor="let task of getTasksByStatus(status)"
-        class="bg-white rounded-xl p-4 mb-4 shadow hover:shadow-lg transition-all border border-gray-100"
+        (click)="openTask(task)"
+        class="cursor-pointer relative bg-white dark:bg-gray-900 rounded-xl p-4 mb-4 shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-200 transform hover:scale-[1.01] hover:shadow-md hover:ring-2 hover:ring-blue-500"
       >
-        <div class="flex justify-between items-center">
-          <h3 class="text-lg font-bold text-gray-900 truncate">{{ task.name }}</h3>
-          <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+        <!-- Top Row -->
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+            {{ task.name }}
+          </h3>
+          <span class="text-xs bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300 px-2 py-0.5 rounded-full">
             {{ task.storyPoints }} pts
           </span>
         </div>
-        <p class="text-sm text-gray-600 mt-1 mb-2 line-clamp-3">{{ task.description }}</p>
-        <div class="text-sm text-gray-700">
-          <p>⏱ Hours: <span class="font-medium">{{ task.hoursTaken }}</span> / {{ task.hoursNeeded }}</p>
+
+        <!-- Description -->
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+          {{ task.description }}
+        </p>
+
+        <!-- Hours -->
+        <!-- Editable Hours -->
+<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 mb-3">
+  ⏱
+  <input
+  type="number"
+  [(ngModel)]="task.hoursTaken"
+  (blur)="updateTaskHours(task)"
+  (click)="$event.stopPropagation()"
+  class="w-16 px-2 py-1 rounded text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100"
+  min="0"
+  [max]="task.hoursNeeded"
+/>
+
+  / {{ task.hoursNeeded }} hrs
+</div>
+
+
+        <!-- Status Selector -->
+        <div class="mb-3">
+          <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Status:</label>
+          <select
+            [(ngModel)]="task.status"
+            (change)="updateStatus(task, task.status)"
+            class="text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100 rounded-md px-3 py-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option *ngFor="let s of taskStatuses" [value]="s">{{ s.replace('-', ' ') | titlecase }}</option>
+          </select>
+        </div>
+
+        <!-- Delete Button -->
+        <div *ngIf="task.status === 'done'" class="text-right">
+          <button
+            (click)="deleteTask(task)"
+            class="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+          >
+            Delete
+          </button>
         </div>
       </div>
 
-      <!-- Add Task Card -->
-      <button
-        (click)="openTaskModal(status)"
-        class="w-full mt-2 flex items-center justify-center text-blue-600 hover:text-blue-800 text-sm py-2 rounded-xl border border-dashed border-blue-400 hover:bg-blue-50 transition"
-      >
-        + Add Task
-      </button>
+      <!-- Add Task Popover -->
+      <details class="mt-4 w-full">
+        <summary class="cursor-pointer text-sm text-blue-600 dark:text-blue-300 hover:underline">
+          + Add Task
+        </summary>
+        <div class="mt-2 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl border border-dashed border-blue-400 dark:border-blue-600">
+          <app-add-task-popover (create)="handleNewTask($event, status)"></app-add-task-popover>
+        </div>
+      </details>
     </div>
   </div>
+
+  <!-- Task Detail Modal -->
+  <app-task-details
+    *ngIf="selectedTask"
+    [task]="selectedTask"
+    (close)="closeTaskDetails()"
+  />
 </div>

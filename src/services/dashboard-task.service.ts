@@ -10,13 +10,16 @@ export interface DashboardTask {
   hoursNeeded: number;
   hoursTaken: number;
   status: 'todo' | 'in-progress' | 'done';
+  userId?: string; // ✅ optional field
 }
+
+export type CreateTaskDto = Omit<DashboardTask, 'id' | 'userId'>; // ✅ define for POST
 
 @Injectable({
   providedIn: 'root',
 })
 export class DashboardTaskService {
-  private readonly apiUrl = 'https://localhost:7224/api/dashboardtasks'; // ✅ FIXED endpoint
+  private readonly apiUrl = 'https://localhost:7224/api/dashboardtasks';
 
   constructor(private http: HttpClient) {}
 
@@ -24,7 +27,7 @@ export class DashboardTaskService {
     return this.http.get<DashboardTask[]>(this.apiUrl);
   }
 
-  create(task: Omit<DashboardTask, 'id'>): Observable<DashboardTask> {
+  create(task: CreateTaskDto): Observable<DashboardTask> {
     return this.http.post<DashboardTask>(this.apiUrl, task);
   }
 

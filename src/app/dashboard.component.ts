@@ -181,17 +181,380 @@
 // }
 
 
+//------------------------------------------------------------------------
+
+
+
+// // src/app/dashboard.component.ts
+// import { Component, OnInit } from '@angular/core';
+// import { CommonModule } from '@angular/common';
+// import { FormsModule } from '@angular/forms';
+// import { ToastrService } from 'ngx-toastr';
+// import {
+//   DashboardTaskService,
+//   DashboardTask,
+//   CreateTaskDto,
+// } from '../services/dashboard-task.service';
+// import { AddTaskPopoverComponent } from './components/add-task-popover/add-task-popover.component';
+// import { TaskDetailsComponent } from './components/task-details/task-details.component';
+
+// @Component({
+//   standalone: true,
+//   selector: 'app-dashboard',
+//   imports: [
+//     CommonModule,
+//     FormsModule,
+//     AddTaskPopoverComponent,
+//     TaskDetailsComponent,
+//   ],
+//   templateUrl: './dashboard.component.html',
+// })
+// export class DashboardComponent implements OnInit {
+//   taskStatuses: ('todo' | 'in-progress' | 'done')[] = ['todo', 'in-progress', 'done'];
+//   tasks: DashboardTask[] = [];
+//   selectedTask: DashboardTask | null = null;
+
+//   constructor(
+//     private taskService: DashboardTaskService,
+//     private toastr: ToastrService
+//   ) {}
+
+//   ngOnInit(): void {
+//     this.loadTasks();
+//   }
+
+//   loadTasks(): void {
+//     this.taskService.getAll().subscribe({
+//       next: (data) => {
+//         this.tasks = data;
+//         console.log('Loaded tasks:', data);
+//       },
+//       error: () => this.toastr.error('Failed to load tasks'),
+//     });
+//   }
+
+//   getTasksByStatus(status: 'todo' | 'in-progress' | 'done'): DashboardTask[] {
+//     return this.tasks.filter((task) => task.status === status);
+//   }
+
+//   updateStatus(task: DashboardTask, newStatus: DashboardTask['status']) {
+//     if (task.status === newStatus) return;
+
+//     const updatedTask: DashboardTask = { ...task, status: newStatus };
+
+//     this.taskService.update(updatedTask).subscribe({
+//       next: () => {
+//         this.toastr.success('✅ Task status updated');
+//         this.loadTasks();
+//       },
+//       error: () => this.toastr.error('❌ Failed to update task'),
+//     });
+//   }
+
+//   handleNewTask(
+//     {
+//       name,
+//       description,
+//       storyPoints,
+//       hoursNeeded,
+//     }: {
+//       name: string;
+//       description: string;
+//       storyPoints: number;
+//       hoursNeeded: number;
+//     },
+//     status: 'todo' | 'in-progress' | 'done'
+//   ) {
+//     const newTask: CreateTaskDto = {
+//       name,
+//       description,
+//       storyPoints,
+//       hoursNeeded,
+//       hoursTaken: 0,
+//       status,
+//     };
+
+//     this.taskService.create(newTask).subscribe({
+//       next: () => {
+//         this.toastr.success('✅ Task created');
+//         this.loadTasks();
+//       },
+//       error: (err) => {
+//         this.toastr.error('❌ Failed to create task');
+//         console.error(err);
+//       },
+//     });
+//   }
+
+//   deleteTask(task: DashboardTask) {
+//     if (confirm(`Delete task "${task.name}"?`)) {
+//       this.taskService.delete(task.id).subscribe({
+//         next: () => {
+//           this.toastr.success(`✅ "${task.name}" deleted`);
+//           this.loadTasks();
+//         },
+//         error: () => {
+//           this.toastr.error('❌ Failed to delete task');
+//         },
+//       });
+//     }
+//   }
+
+//   openTask(task: DashboardTask) {
+//     this.selectedTask = task;
+//   }
+
+//   closeTaskDetails() {
+//     this.selectedTask = null;
+//   }
+
+
+//   updateTaskHours(task: DashboardTask) {
+//   // Optional: validate hoursTaken
+//   if (task.hoursTaken < 0 || task.hoursTaken > task.hoursNeeded) {
+//     this.toastr.warning('Invalid hours entered');
+//     this.loadTasks(); // Reload to revert UI
+//     return;
+//   }
+
+//   this.taskService.update(task).subscribe({
+//     next: () => {
+//       this.toastr.success('🕒 Hours updated');
+//       this.loadTasks();
+//     },
+//     error: () => {
+//       this.toastr.error('❌ Failed to update hours');
+//     },
+//   });
+// }
+
+// }
+
+
+
+
+
+
+//-------------------------------------------------------------------
+
+
+
+// // src/app/dashboard.component.ts
+// import { Component, OnInit } from '@angular/core';
+// import { CommonModule } from '@angular/common';
+// import { FormsModule } from '@angular/forms';
+// import { ToastrService } from 'ngx-toastr';
+// import { DashboardTaskService, DashboardTask, CreateTaskDto } from '../services/dashboard-task.service';
+// import { SprintService } from '../services/sprint.service';
+// import { Sprint } from '../models/sprint.model';
+// import { AddTaskPopoverComponent } from './components/add-task-popover/add-task-popover.component';
+// import { TaskDetailsComponent } from './components/task-details/task-details.component';
+
+// @Component({
+//   standalone: true,
+//   selector: 'app-dashboard',
+//   imports: [
+//     CommonModule,
+//     FormsModule,
+//     AddTaskPopoverComponent,
+//     TaskDetailsComponent,
+//   ],
+//   templateUrl: './dashboard.component.html',
+// })
+// export class DashboardComponent implements OnInit {
+//   taskStatuses: ('todo' | 'in-progress' | 'done')[] = ['todo', 'in-progress', 'done'];
+//   tasks: DashboardTask[] = [];
+//   sprints: Sprint[] = [];
+//   selectedSprint: Sprint | null = null;
+//   selectedTask: DashboardTask | null = null;
+//   addTaskStatus: 'todo' | 'in-progress' | 'done' | null = null;
+
+//   constructor(
+//     private taskService: DashboardTaskService,
+//     private sprintService: SprintService,
+//     private toastr: ToastrService
+//   ) {}
+
+//   ngOnInit(): void {
+//     this.loadSprints();
+//   }
+
+//   loadSprints() {
+//     this.sprintService.getMySprints().subscribe({
+//       next: (data) => {
+//         this.sprints = data;
+//         if (data.length > 0) {
+//           this.selectedSprint = data[0];
+//           this.loadTasksForSprint(data[0].id);
+//         } else {
+//           this.selectedSprint = null;
+//           this.loadUnassignedTasks();
+//         }
+//       },
+//       error: () => this.toastr.error('❌ Failed to load sprints'),
+//     });
+//   }
+
+//   loadTasksForSprint(sprintId: string): void {
+//     this.taskService.getBySprint(sprintId).subscribe({
+//       next: (data) => (this.tasks = data),
+//       error: () => this.toastr.error('❌ Failed to load tasks'),
+//     });
+//   }
+
+//   loadUnassignedTasks() {
+//     this.taskService.getAll().subscribe({
+//       next: (data) => {
+//         this.tasks = data.filter((task) => !task.sprintId);
+//       },
+//       error: () => this.toastr.error('❌ Failed to load unassigned tasks'),
+//     });
+//   }
+
+//   handleSprintChange(event: Event) {
+//     const selectElement = event.target as HTMLSelectElement;
+//     const sprintId = selectElement.value;
+//     this.onSprintChange(sprintId);
+//   }
+
+//   onSprintChange(sprintId: string) {
+//     if (!sprintId) {
+//       this.selectedSprint = null;
+//       this.loadUnassignedTasks();
+//     } else {
+//       const sprint = this.sprints.find((s) => s.id === sprintId);
+//       if (sprint) {
+//         this.selectedSprint = sprint;
+//         this.loadTasksForSprint(sprint.id);
+//       }
+//     }
+//   }
+
+//   getTasksByStatus(status: 'todo' | 'in-progress' | 'done'): DashboardTask[] {
+//     return this.tasks.filter((task) => task.status === status);
+//   }
+
+//   openTask(task: DashboardTask) {
+//     this.selectedTask = task;
+//   }
+
+//   closeTaskDetails() {
+//     this.selectedTask = null;
+//   }
+
+//   showAddTaskPopover(status: 'todo' | 'in-progress' | 'done') {
+//   this.addTaskStatus = this.addTaskStatus === status ? null : status;
+// }
+
+
+//   handleNewTask(
+//     {
+//       name,
+//       description,
+//       storyPoints,
+//       hoursNeeded,
+//     }: {
+//       name: string;
+//       description: string;
+//       storyPoints: number;
+//       hoursNeeded: number;
+//     }
+//   ) {
+//     if (!this.addTaskStatus) return;
+
+//     const newTask: CreateTaskDto = {
+//       name,
+//       description,
+//       storyPoints,
+//       hoursNeeded,
+//       hoursTaken: 0,
+//       status: this.addTaskStatus,
+//       sprintId: this.selectedSprint?.id,
+//     };
+
+//     this.taskService.create(newTask).subscribe({
+//       next: () => {
+//         this.toastr.success('✅ Task created');
+//         if (this.selectedSprint) {
+//           this.loadTasksForSprint(this.selectedSprint.id);
+//         } else {
+//           this.loadUnassignedTasks();
+//         }
+//         this.addTaskStatus = null;
+//       },
+//       error: () => {
+//         this.toastr.error('❌ Failed to create task');
+//         this.addTaskStatus = null;
+//       },
+//     });
+//   }
+
+//   deleteTask(task: DashboardTask) {
+//     if (confirm(`Delete task "${task.name}"?`)) {
+//       this.taskService.delete(task.id).subscribe({
+//         next: () => {
+//           this.toastr.success(`✅ "${task.name}" deleted`);
+//           if (this.selectedSprint) {
+//             this.loadTasksForSprint(this.selectedSprint.id);
+//           } else {
+//             this.loadUnassignedTasks();
+//           }
+//         },
+//         error: () => this.toastr.error('❌ Failed to delete task'),
+//       });
+//     }
+//   }
+
+//   updateTaskHours(task: DashboardTask) {
+//     if (task.hoursTaken < 0 || task.hoursTaken > task.hoursNeeded) {
+//       this.toastr.warning('Invalid hours entered');
+//       this.loadSprints();
+//       return;
+//     }
+
+//     this.taskService.update(task).subscribe({
+//       next: () => this.toastr.success('🕒 Hours updated'),
+//       error: () => this.toastr.error('❌ Failed to update hours'),
+//     });
+//   }
+
+//   updateStatus(task: DashboardTask, newStatus: DashboardTask['status']) {
+//     if (task.status === newStatus) return;
+
+//     const updatedTask: DashboardTask = { ...task, status: newStatus };
+
+//     this.taskService.update(updatedTask).subscribe({
+//       next: () => {
+//         this.toastr.success('✅ Task status updated');
+//         if (this.selectedSprint) {
+//           this.loadTasksForSprint(this.selectedSprint.id);
+//         } else {
+//           this.loadUnassignedTasks();
+//         }
+//       },
+//       error: () => this.toastr.error('❌ Failed to update task'),
+//     });
+//   }
+// }
+
+
 
 // src/app/dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+
 import {
   DashboardTaskService,
   DashboardTask,
   CreateTaskDto,
 } from '../services/dashboard-task.service';
+
+import { SprintService } from '../services/sprint.service';
+import { Sprint } from '../models/sprint.model';
+import { CreateSprintDto } from '../models/create-sprint-dto.model';
+
 import { AddTaskPopoverComponent } from './components/add-task-popover/add-task-popover.component';
 import { TaskDetailsComponent } from './components/task-details/task-details.component';
 
@@ -211,118 +574,230 @@ export class DashboardComponent implements OnInit {
   tasks: DashboardTask[] = [];
   selectedTask: DashboardTask | null = null;
 
+  sprints: Sprint[] = [];
+  selectedSprint: Sprint | null = null;
+  selectedSprintId: string = '';
+  selectedSprintUserEmails: string[] = [];
+  isSprintCreator: boolean = false;
+
+  creatingSprint = false;
+  newSprint: CreateSprintDto = { name: '', startDate: '', endDate: '' };
+  inviteEmail: string = '';
+  addTaskStatus: 'todo' | 'in-progress' | 'done' | null = null;
+
   constructor(
     private taskService: DashboardTaskService,
+    private sprintService: SprintService,
     private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
-    this.loadTasks();
+    this.loadSprints();
   }
 
-  loadTasks(): void {
+  getCurrentUserEmail(): string | null {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload['email'] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  loadSprints(): void {
+    this.sprintService.getMySprints().subscribe({
+      next: (data) => {
+        this.sprints = data;
+        if (data.length > 0) {
+          this.selectSprint(data[0].id);
+        } else {
+          this.selectedSprint = null;
+          this.selectedSprintId = '';
+          this.loadUnassignedTasks();
+        }
+      },
+      error: () => this.toastr.error('❌ Failed to load sprints'),
+    });
+  }
+
+  selectSprint(sprintId: string): void {
+    this.selectedSprintId = sprintId;
+    if (!sprintId) {
+      this.selectedSprint = null;
+      this.selectedSprintUserEmails = [];
+      this.loadUnassignedTasks();
+      return;
+    }
+
+    const sprint = this.sprints.find(s => s.id === sprintId);
+    if (sprint) {
+      this.selectedSprint = sprint;
+      this.loadTasksForSprint(sprint.id);
+      this.loadSprintUsers(sprint.id);
+      const email = this.getCurrentUserEmail();
+      this.isSprintCreator = !!email && sprint.createdBy === email;
+    }
+  }
+
+  loadTasksForSprint(sprintId: string): void {
+    this.taskService.getBySprint(sprintId).subscribe({
+      next: (data) => this.tasks = data,
+      error: () => this.toastr.error('❌ Failed to load tasks'),
+    });
+  }
+
+  loadUnassignedTasks(): void {
     this.taskService.getAll().subscribe({
       next: (data) => {
-        this.tasks = data;
-        console.log('Loaded tasks:', data);
+        this.tasks = data.filter(t => !t.sprintId);
       },
-      error: () => this.toastr.error('Failed to load tasks'),
+      error: () => this.toastr.error('❌ Failed to load tasks'),
     });
+  }
+
+  loadSprintUsers(sprintId: string): void {
+    this.sprintService.getSprintUsers(sprintId).subscribe({
+      next: (users) => this.selectedSprintUserEmails = users,
+      error: () => this.toastr.error('❌ Failed to load sprint users'),
+    });
+  }
+
+  inviteUserToSprint(): void {
+    if (!this.selectedSprint || !this.inviteEmail) return;
+
+    this.sprintService.inviteUser(this.selectedSprint.id, this.inviteEmail).subscribe({
+      next: () => {
+        this.toastr.success('✅ User invited');
+        this.loadSprintUsers(this.selectedSprint!.id);
+        this.inviteEmail = '';
+      },
+      error: () => this.toastr.error('❌ Failed to invite user'),
+    });
+  }
+
+  createSprint(): void {
+    const { name, startDate, endDate } = this.newSprint;
+    if (!name || !startDate || !endDate) {
+      this.toastr.warning('⚠️ Fill in all sprint fields');
+      return;
+    }
+
+    this.sprintService.createSprint(this.newSprint).subscribe({
+      next: (sprint) => {
+        this.sprints.push(sprint);
+        this.selectSprint(sprint.id);
+        this.creatingSprint = false;
+        this.newSprint = { name: '', startDate: '', endDate: '' };
+        this.toastr.success('✅ Sprint created');
+      },
+      error: () => this.toastr.error('❌ Failed to create sprint'),
+    });
+  }
+
+  deleteSprint(): void {
+    if (!this.selectedSprint) return;
+
+    const confirmDelete = confirm('Are you sure you want to delete this sprint?');
+    if (!confirmDelete) return;
+
+    const id = this.selectedSprint.id;
+    this.sprintService.deleteSprint(id).subscribe({
+      next: () => {
+        this.sprints = this.sprints.filter(s => s.id !== id);
+        this.selectedSprint = null;
+        this.selectedSprintId = '';
+        this.loadUnassignedTasks();
+        this.toastr.success('✅ Sprint deleted');
+      },
+      error: () => this.toastr.error('❌ Failed to delete sprint'),
+    });
+  }
+
+  showAddTaskPopover(status: 'todo' | 'in-progress' | 'done'): void {
+    this.addTaskStatus = this.addTaskStatus === status ? null : status;
   }
 
   getTasksByStatus(status: 'todo' | 'in-progress' | 'done'): DashboardTask[] {
-    return this.tasks.filter((task) => task.status === status);
+    return this.tasks.filter(task => task.status === status);
   }
 
-  updateStatus(task: DashboardTask, newStatus: DashboardTask['status']) {
-    if (task.status === newStatus) return;
-
-    const updatedTask: DashboardTask = { ...task, status: newStatus };
-
-    this.taskService.update(updatedTask).subscribe({
-      next: () => {
-        this.toastr.success('✅ Task status updated');
-        this.loadTasks();
-      },
-      error: () => this.toastr.error('❌ Failed to update task'),
-    });
-  }
-
-  handleNewTask(
-    {
-      name,
-      description,
-      storyPoints,
-      hoursNeeded,
-    }: {
-      name: string;
-      description: string;
-      storyPoints: number;
-      hoursNeeded: number;
-    },
-    status: 'todo' | 'in-progress' | 'done'
-  ) {
+  handleNewTask({ name, description, storyPoints, hoursNeeded }: {
+    name: string;
+    description: string;
+    storyPoints: number;
+    hoursNeeded: number;
+  }): void {
     const newTask: CreateTaskDto = {
       name,
       description,
       storyPoints,
       hoursNeeded,
       hoursTaken: 0,
-      status,
+      status: this.addTaskStatus!,
+      sprintId: this.selectedSprint?.id,
     };
 
     this.taskService.create(newTask).subscribe({
       next: () => {
         this.toastr.success('✅ Task created');
-        this.loadTasks();
+        this.refreshTasks();
+        this.addTaskStatus = null;
       },
-      error: (err) => {
-        this.toastr.error('❌ Failed to create task');
-        console.error(err);
-      },
+      error: () => this.toastr.error('❌ Failed to create task'),
     });
   }
 
-  deleteTask(task: DashboardTask) {
-    if (confirm(`Delete task "${task.name}"?`)) {
-      this.taskService.delete(task.id).subscribe({
-        next: () => {
-          this.toastr.success(`✅ "${task.name}" deleted`);
-          this.loadTasks();
-        },
-        error: () => {
-          this.toastr.error('❌ Failed to delete task');
-        },
-      });
+  updateStatus(task: DashboardTask, newStatus: DashboardTask['status']): void {
+    if (task.status === newStatus) return;
+
+    const updated: DashboardTask = { ...task, status: newStatus };
+    this.taskService.update(updated).subscribe({
+      next: () => this.refreshTasks(),
+      error: () => this.toastr.error('❌ Failed to update status'),
+    });
+  }
+
+  updateTaskHours(task: DashboardTask): void {
+    if (task.hoursTaken < 0 || task.hoursTaken > task.hoursNeeded) {
+      this.toastr.warning('⚠️ Invalid hours entered');
+      this.refreshTasks();
+      return;
+    }
+
+    this.taskService.update(task).subscribe({
+      next: () => this.toastr.success('✅ Hours updated'),
+      error: () => this.toastr.error('❌ Failed to update hours'),
+    });
+  }
+
+  deleteTask(task: DashboardTask): void {
+    if (!confirm(`Delete task "${task.name}"?`)) return;
+
+    this.taskService.delete(task.id).subscribe({
+      next: () => this.refreshTasks(),
+      error: () => this.toastr.error('❌ Failed to delete task'),
+    });
+  }
+
+  refreshTasks(): void {
+    if (this.selectedSprint) {
+      this.loadTasksForSprint(this.selectedSprint.id);
+    } else {
+      this.loadUnassignedTasks();
     }
   }
 
-  openTask(task: DashboardTask) {
+  openTask(task: DashboardTask): void {
     this.selectedTask = task;
   }
 
-  closeTaskDetails() {
+  closeTaskDetails(): void {
     this.selectedTask = null;
   }
 
-
-  updateTaskHours(task: DashboardTask) {
-  // Optional: validate hoursTaken
-  if (task.hoursTaken < 0 || task.hoursTaken > task.hoursNeeded) {
-    this.toastr.warning('Invalid hours entered');
-    this.loadTasks(); // Reload to revert UI
-    return;
+  onSprintChange(sprintId: string): void {
+    this.selectSprint(sprintId);
   }
-
-  this.taskService.update(task).subscribe({
-    next: () => {
-      this.toastr.success('🕒 Hours updated');
-      this.loadTasks();
-    },
-    error: () => {
-      this.toastr.error('❌ Failed to update hours');
-    },
-  });
-}
-
 }

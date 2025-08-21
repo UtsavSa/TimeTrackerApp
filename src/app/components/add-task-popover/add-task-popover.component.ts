@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -9,6 +9,9 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './add-task-popover.component.html',
 })
 export class AddTaskPopoverComponent {
+  
+  @Input() status!: 'todo' | 'in-progress' | 'done'; // ✅ Add this line
+
   name = '';
   description = '';
   storyPoints: number | null = null;

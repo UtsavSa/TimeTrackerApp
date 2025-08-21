@@ -1,94 +1,178 @@
-<div class="p-6 text-gray-900 dark:text-gray-100">
-  <h1 class="text-3xl font-bold mb-8 text-center">🗂️ Sprint Planning Board</h1>
+<div class="p-6 space-y-6 text-gray-800 dark:text-gray-100">
+  <!-- 🧭 Sprint Selector & Controls -->
+  <div class="flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-3">
+      <label class="text-sm font-medium">Sprint:</label>
+      <select
+        [(ngModel)]="selectedSprintId"
+        (change)="onSprintChange(selectedSprintId)"
+        class="rounded-full border px-4 py-2 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 shadow-sm">
+        <option value=""> 🌀 Unassigned</option>
+        <option *ngFor="let sprint of sprints" [value]="sprint.id"> 📈 {{ sprint.name }}</option>
+      </select>
+    </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Columns -->
-    <div
-      *ngFor="let status of taskStatuses"
-      class="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-lg border border-gray-200 dark:border-gray-700"
-    >
-      <h2 class="text-xl font-semibold mb-4 capitalize text-blue-700 dark:text-blue-400">
-        {{ status.replace('-', ' ') }}
-      </h2>
-
-      <!-- Task Cards -->
-      <div
-        *ngFor="let task of getTasksByStatus(status)"
-        (click)="openTask(task)"
-        class="cursor-pointer relative bg-white dark:bg-gray-900 rounded-xl p-4 mb-4 shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-200 transform hover:scale-[1.01] hover:shadow-md hover:ring-2 hover:ring-blue-500"
-      >
-        <!-- Top Row -->
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
-            {{ task.name }}
-          </h3>
-          <span class="text-xs bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300 px-2 py-0.5 rounded-full">
-            {{ task.storyPoints }} pts
-          </span>
-        </div>
-
-        <!-- Description -->
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-          {{ task.description }}
-        </p>
-
-        <!-- Hours -->
-        <!-- Editable Hours -->
-<div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 mb-3">
-  ⏱
-  <input
-  type="number"
-  [(ngModel)]="task.hoursTaken"
-  (blur)="updateTaskHours(task)"
-  (click)="$event.stopPropagation()"
-  class="w-16 px-2 py-1 rounded text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100"
-  min="0"
-  [max]="task.hoursNeeded"
-/>
-
-  / {{ task.hoursNeeded }} hrs
-</div>
-
-
-        <!-- Status Selector -->
-        <div class="mb-3">
-          <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Status:</label>
-          <select
-            [(ngModel)]="task.status"
-            (change)="updateStatus(task, task.status)"
-            class="text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100 rounded-md px-3 py-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option *ngFor="let s of taskStatuses" [value]="s">{{ s.replace('-', ' ') | titlecase }}</option>
-          </select>
-        </div>
-
-        <!-- Delete Button -->
-        <div *ngIf="task.status === 'done'" class="text-right">
-          <button
-            (click)="deleteTask(task)"
-            class="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Add Task Popover -->
-      <details class="mt-4 w-full">
-        <summary class="cursor-pointer text-sm text-blue-600 dark:text-blue-300 hover:underline">
-          + Add Task
-        </summary>
-        <div class="mt-2 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl border border-dashed border-blue-400 dark:border-blue-600">
-          <app-add-task-popover (create)="handleNewTask($event, status)"></app-add-task-popover>
-        </div>
-      </details>
+    <div class="flex gap-2">
+      <button
+        *ngIf="isSprintCreator"
+        (click)="deleteSprint()"
+        class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-full shadow-md">
+        🗑️ Delete
+      </button>
+      <button
+        (click)="creatingSprint = !creatingSprint"
+        class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-full shadow-md">
+        {{ creatingSprint ? '✖ Cancel' : '➕ Create Sprint' }}
+      </button>
     </div>
   </div>
 
-  <!-- Task Detail Modal -->
+  <!-- 👥 Sprint Members & Invite -->
+  <div *ngIf="selectedSprint" class="space-y-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm">
+    <div class="flex flex-wrap items-center gap-2 text-sm">
+      <span class="font-semibold text-gray-700 dark:text-gray-200">👥 Members:</span>
+      <span
+        *ngFor="let email of selectedSprintUserEmails"
+        class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 px-2 py-1 rounded-full text-xs"
+      >
+        {{ email }}
+      </span>
+    </div>
+
+    <div *ngIf="isSprintCreator" class="flex flex-col sm:flex-row gap-2 mt-2">
+      <input
+        type="email"
+        [(ngModel)]="inviteEmail"
+        placeholder="Invite user by email"
+        class="flex-1 px-3 py-2 rounded-full border text-sm shadow-sm dark:bg-gray-800 dark:text-white dark:border-gray-600"
+      />
+      <button
+        (click)="inviteUserToSprint()"
+        class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded-full shadow-md"
+      >
+        ✉️ Invite
+      </button>
+    </div>
+  </div>
+
+  <!-- 📅 Create Sprint Form -->
+  <div *ngIf="creatingSprint" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <input type="text" [(ngModel)]="newSprint.name" placeholder="🏁 Sprint Name"
+      class="rounded-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm" />
+    <input type="date" [(ngModel)]="newSprint.startDate"
+      class="rounded-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm" />
+    <input type="date" [(ngModel)]="newSprint.endDate"
+      class="rounded-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm" />
+    <button
+      (click)="createSprint()"
+      class="col-span-1 sm:col-span-3 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-full shadow-md">
+      ✅ Create Sprint
+    </button>
+  </div>
+
+  <!-- 🗂️ Task Board -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
+    <div *ngFor="let status of taskStatuses" class="bg-gray-100 dark:bg-gray-800 rounded-2xl p-4 shadow-inner">
+      <!-- Column Header -->
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold">
+          {{ status === 'todo' ? '📝 To Do' : status === 'in-progress' ? '🔄 In Progress' : '✅ Done' }}
+        </h2>
+        <button
+          (click)="showAddTaskPopover(status)"
+          class="text-xl hover:scale-110 transition rounded-full bg-white dark:bg-gray-700 w-8 h-8 flex items-center justify-center shadow-sm"
+          aria-label="Add Task"
+        >➕</button>
+      </div>
+
+      <!-- Add Task Popover -->
+      <app-add-task-popover
+        *ngIf="addTaskStatus === status"
+        [status]="status"
+        (close)="addTaskStatus = null"
+        (create)="handleNewTask($event)">
+      </app-add-task-popover>
+
+      <!-- Task Cards -->
+      <div *ngFor="let task of getTasksByStatus(status)">
+        <div
+          class="relative bg-white dark:bg-gray-700 p-4 mb-4 rounded-2xl shadow group cursor-pointer transition hover:ring-2 hover:ring-indigo-400"
+          (click)="openTask(task)"
+        >
+
+          <!-- Delete Icon -->
+          <button
+            (click)="deleteTask(task); $event.stopPropagation()"
+            class="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition text-sm"
+            title="Delete Task"
+          >🗑️</button>
+
+          <!-- Status Badge -->
+          <div class="mb-3">
+            <span
+              [ngClass]="{
+                'bg-yellow-200 text-yellow-900 border-yellow-300': task.status === 'todo',
+                'bg-blue-200 text-blue-900 border-blue-300': task.status === 'in-progress',
+                'bg-green-200 text-green-900 border-green-300': task.status === 'done'
+              }"
+              class="text-sm font-semibold px-3 py-1 rounded-full border shadow-sm inline-flex items-center gap-1"
+            >
+              {{ task.status === 'todo' ? '📝 To Do' : task.status === 'in-progress' ? '🔄 In Progress' : '✅ Done' }}
+            </span>
+          </div>
+
+          <!-- Title -->
+          <h4 class="text-md font-semibold mb-1">{{ task.name }}</h4>
+
+          <!-- Description -->
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2 truncate">
+            {{ task.description || 'No description provided' }}
+          </p>
+
+          <!-- Metrics -->
+          <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+            🎯 {{ task.storyPoints }} pts • ⏱ {{ task.hoursTaken }}/{{ task.hoursNeeded }} hrs
+          </div>
+
+          <!-- Hours Input -->
+          <div class="mb-2">
+            <label class="text-xs">Hours Taken:</label>
+            <input
+              type="number"
+              min="0"
+              [max]="task.hoursNeeded"
+              [(ngModel)]="task.hoursTaken"
+              (change)="updateTaskHours(task)"
+              (click)="$event.stopPropagation()"
+              class="w-20 px-2 py-1 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 dark:text-white shadow-sm"
+            />
+          </div>
+
+          <!-- Status Actions -->
+          <div class="flex flex-wrap gap-2 mt-3">
+            <button
+              *ngFor="let s of taskStatuses"
+              (click)="updateStatus(task, s); $event.stopPropagation()"
+              [ngClass]="{
+                'bg-indigo-600 text-white': task.status === s,
+                'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200': task.status !== s
+              }"
+              class="px-4 py-2 text-sm font-medium rounded-full transition hover:scale-105 shadow-sm"
+            >
+              {{ s === 'todo' ? '📝 To Do' : s === 'in-progress' ? '🔄 In Progress' : '✅ Done' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔍 Task Details Modal -->
   <app-task-details
     *ngIf="selectedTask"
     [task]="selectedTask"
     (close)="closeTaskDetails()"
-  />
+    (delete)="deleteTask(selectedTask!)"
+    (statusChange)="updateStatus($event.task, $event.status)"
+  ></app-task-details>
 </div>

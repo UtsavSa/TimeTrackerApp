@@ -1,45 +1,70 @@
-<div
-  class="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center"
-  (click)="emitClose()"
->
-  <div
-    class="bg-white dark:bg-gray-900 rounded-xl p-6 w-full max-w-md relative"
-    (click)="$event.stopPropagation()"
-  >
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="relative w-full max-w-lg p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-xl">
+
+    <!-- Close Button -->
     <button
       (click)="emitClose()"
-      class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 dark:hover:text-white"
+      class="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition text-lg font-bold"
+      aria-label="Close"
     >
-      ✖
+      ✕
     </button>
 
-    <h2 class="text-2xl font-bold mb-2">{{ task.name }}</h2>
-    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-      {{ task.description }}
+    <!-- Task Name -->
+    <h2 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+      {{ task.name }}
+    </h2>
+
+    <!-- Task Description -->
+    <p class="text-gray-600 dark:text-gray-300 mb-4">
+      {{ task.description || 'No description provided.' }}
     </p>
 
-    <div class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-      <strong>Points:</strong> {{ task.storyPoints }}<br />
-      <strong>Hours:</strong> {{ task.hoursTaken }} / {{ task.hoursNeeded }}
-    </div>
-
+    <!-- Editable Hours Taken -->
     <div class="mb-4">
-      <label class="block text-xs mb-1">Status:</label>
-      <select
-        [(ngModel)]="task.status"
-        class="w-full px-3 py-1 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
-      >
-        <option value="todo">To Do</option>
-        <option value="in-progress">In Progress</option>
-        <option value="done">Done</option>
-      </select>
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hours Taken</label>
+      <input
+        type="number"
+        [(ngModel)]="task.hoursTaken"
+        min="0"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+      />
     </div>
 
-    <button
-      (click)="emitClose()"
-      class="bg-blue-600 text-white px-4 py-2 rounded text-sm w-full"
-    >
-      Close
-    </button>
+    <!-- Status Buttons -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Change Status</label>
+      <div class="flex gap-2 flex-wrap">
+        <button
+          *ngFor="let status of statuses"
+          (click)="emitStatusChange(status)"
+          [class.bg-indigo-600]="task.status === status"
+          [class.text-white]="task.status === status"
+          class="px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-indigo-500 hover:text-white transition"
+        >
+          <ng-container [ngSwitch]="status">
+            <ng-container *ngSwitchCase="'todo'">
+              📝 Todo
+            </ng-container>
+            <ng-container *ngSwitchCase="'in-progress'">
+              🔄 In Progress
+            </ng-container>
+            <ng-container *ngSwitchCase="'done'">
+              ✅ Done
+            </ng-container>
+          </ng-container>
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-end">
+      <button
+        (click)="emitClose()"
+        class="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+      >
+        Close
+      </button>
+    </div>
   </div>
 </div>

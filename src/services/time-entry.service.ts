@@ -2,13 +2,17 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TimeEntry } from '../models/time-entry.model';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TimeEntryService {
-  private readonly apiUrl = 'https://localhost:7224/api/timeentry';
-
+  //private readonly apiUrl = 'https://localhost:7224/api/timeentry';
+  //private readonly apiUrl = `${environment.apiUrl}/api/timeentry`; // ✅ Use env
+  private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
+  //private readonly baseUrl = `${environment.apiUrl}/api/auth`; // ✅ Updated
+  private readonly apiUrl =  `${this.api}/api/timeentry`;
   constructor(private http: HttpClient) {}
 
   // ✅ Punch In (with JSON body)

@@ -10,12 +10,21 @@ import { ToastrModule } from 'ngx-toastr';
 import { appRoutes } from './app/app.routes';
 import { AuthInterceptorProvider } from './app/interceptors/auth.interceptor';
 
+// ✅ Global icon registration
+import { provideIcons } from '@ng-icons/core';
+import {
+  lucideX,
+  lucideCircle,
+  lucideLoader,
+  lucideCheck,
+} from '@ng-icons/lucide';
+
 bootstrapApplication(AppComponent, {
   providers: [
-    provideHttpClient(withInterceptorsFromDi()), // ✅ Uses interceptors provided via DI
+    provideHttpClient(withInterceptorsFromDi()),
     provideRouter(appRoutes),
     provideAnimations(),
-    AuthInterceptorProvider, // ✅ Registers your class-based AuthInterceptor
+    AuthInterceptorProvider,
     importProvidersFrom(
       ToastrModule.forRoot({
         positionClass: 'toast-bottom-right',
@@ -23,5 +32,12 @@ bootstrapApplication(AppComponent, {
         preventDuplicates: true,
       })
     ),
+    // ✅ Global icon registration for all components
+    provideIcons({
+      lucideX,
+      lucideCircle,
+      lucideLoader,
+      lucideCheck,
+    }),
   ],
 }).catch((err) => console.error(err));

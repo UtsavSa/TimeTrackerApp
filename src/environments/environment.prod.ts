@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://timetrackerappbackend.onrender.com'
+  apiUrl: 'https://timetrackerappbackend.onrender.com/login'
 };

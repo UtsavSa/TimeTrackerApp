@@ -42,7 +42,6 @@
                 }
               ],
               "optimization": true,
-              "outputPath": "dist/time-tracker-app/browser",
               "budgets": [
                 {
                   "type": "initial",

@@ -8,7 +8,9 @@
         (change)="onSprintChange(selectedSprintId)"
         class="rounded-full border px-4 py-2 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 shadow-sm">
         <option value=""> 🌀 Unassigned</option>
-        <option *ngFor="let sprint of sprints" [value]="sprint.id"> 📈 {{ sprint.name }}</option>
+        <option *ngFor="let sprint of sprints" [value]="sprint.id" [title]="sprint.name">
+    📈 {{ sprint.name  }}              
+  </option>
       </select>
     </div>
 
@@ -26,6 +28,33 @@
       </button>
     </div>
   </div>
+
+  <!-- 📅 Sprint Date Range & Progress -->
+<div *ngIf="selectedSprint" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm mt-3">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="text-sm">
+      <div class="font-semibold text-gray-700 dark:text-gray-200">
+        📅 {{ formatDate(selectedSprint.startDate) }} → {{ formatDate(selectedSprint.endDate) }}
+      </div>
+      <div class="text-gray-600 dark:text-gray-400">
+        {{ sprintDaysLeftText }}
+      </div>
+    </div>
+
+    <div class="flex-1 min-w-[200px] max-w-[360px]">
+      <div class="w-full h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+        <div
+          class="h-2 bg-indigo-600 dark:bg-indigo-500 rounded-full transition-all"
+          [style.width.%]="sprintProgressPercent">
+        </div>
+      </div>
+      <div class="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
+        {{ sprintProgressPercent }}%
+      </div>
+    </div>
+  </div>
+</div>
+
 
   <!-- 👥 Sprint Members & Invite -->
   <div *ngIf="selectedSprint" class="space-y-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm">
@@ -55,11 +84,25 @@
     </div>
   </div>
 
-  <!-- 📅 Create Sprint Form -->
+  <!-- 📅 Create Sprint Form 
   <div *ngIf="creatingSprint" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <input type="text" [(ngModel)]="newSprint.name" placeholder="🏁 Sprint Name"
-      class="rounded-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm" />
-    <input type="date" [(ngModel)]="newSprint.startDate"
+    
+    <input
+  type="text"
+  [(ngModel)]="newSprint.name"
+  (ngModelChange)="onSprintNameInput()"             
+  [attr.maxlength]="MAX_SPRINT_NAME"               
+  placeholder="🏁 Sprint Name"
+  class="rounded-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm"
+/>
+<div class="text-xs text-right mt-1"
+     [ngClass]="{
+       'text-red-600': (newSprint.name?.length || 0) > MAX_SPRINT_NAME,
+       'text-yellow-600': (newSprint.name?.length || 0) > NAME_WARN_THRESHOLD
+     }">
+  {{ (newSprint.name?.length || 0) }}/{{ MAX_SPRINT_NAME }}
+</div>
+      <input type="date" [(ngModel)]="newSprint.startDate"
       class="rounded-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm" />
     <input type="date" [(ngModel)]="newSprint.endDate"
       class="rounded-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm" />
@@ -69,6 +112,117 @@
       ✅ Create Sprint
     </button>
   </div>
+-->
+
+
+  <!-- 📅 Create Sprint Form -->
+<div *ngIf="creatingSprint" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm">
+  <form class="grid grid-cols-1 sm:grid-cols-3 gap-4" (ngSubmit)="createSprint()">
+    <!-- Name -->
+    <div class="sm:col-span-3">
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+        🏁 Sprint name
+        <span class="text-xs text-gray-500">(max {{ MAX_SPRINT_NAME }})</span>
+      </label>
+
+      <div class="relative">
+        <input
+          type="text"
+          [(ngModel)]="newSprint.name"
+          name="sprintName"
+          (ngModelChange)="onSprintNameInput()"
+          [attr.maxlength]="MAX_SPRINT_NAME"
+          placeholder="For e.g., Frontend Work – Sprint 14"
+          class="w-full rounded-full px-4 pr-14 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        <!-- live counter badge -->
+        <span
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-xs px-2 py-0.5 rounded-full border"
+          [ngClass]="{
+            'text-gray-500 border-gray-300 dark:text-gray-300 dark:border-gray-600': nameLen <= NAME_WARN_THRESHOLD,
+            'text-yellow-700 bg-yellow-100 border-yellow-300 dark:text-yellow-200 dark:bg-yellow-700/30 dark:border-yellow-600': nameLen > NAME_WARN_THRESHOLD && nameLen <= MAX_SPRINT_NAME,
+            'text-red-700 bg-red-100 border-red-300 dark:text-red-200 dark:bg-red-700/30 dark:border-red-600': nameLen > MAX_SPRINT_NAME
+          }">
+          {{ nameLen }}/{{ MAX_SPRINT_NAME }}
+        </span>
+      </div>
+
+      
+      <p *ngIf="nameLen > MAX_SPRINT_NAME" class="mt-1 text-xs text-red-600">
+        Sprint name is too long.
+      </p>
+    </div>
+
+    <!-- Dates row: start on the left, end on the right -->
+<div class="sm:col-span-3">
+  <div class="flex flex-col sm:flex-row sm:items-end sm:gap-4">
+    <!-- Start date (left) -->
+    <div class="w-full sm:max-w-xs">
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Start date</label>
+      <input
+        type="date"
+        [(ngModel)]="newSprint.startDate"
+        name="startDate"
+        [attr.min]="todayStr"
+        class="w-full rounded-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Can’t start in the past.</p>
+    </div>
+
+    <!-- End date (right) -->
+    <div class="w-full sm:max-w-xs sm:ml-auto">
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">End date</label>
+      <input
+        type="date"
+        [(ngModel)]="newSprint.endDate"
+        name="endDate"
+        [attr.min]="newSprint.startDate || todayStr"
+        class="w-full rounded-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Must be on/after the start date.</p>
+      <p
+        *ngIf="newSprint.startDate && newSprint.endDate && newSprint.endDate < newSprint.startDate"
+        class="mt-1 text-xs text-red-600"
+      >
+        End date cannot be before the start date.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+    <!-- Spacer for grid alignment -->
+    <div class="hidden sm:block"></div>
+
+    <!-- Actions -->
+    <div class="sm:col-span-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 justify-end mt-2">
+      <button
+        type="button"
+        (click)="creatingSprint = false"
+        class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+      >
+        <ng-icon name="lucideX" class="w-4 h-4"></ng-icon>
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        [disabled]="
+          savingSprint ||
+          !(newSprint.name && newSprint.startDate && newSprint.endDate) ||
+          nameLen > MAX_SPRINT_NAME ||
+          (newSprint.startDate && newSprint.endDate && newSprint.endDate < newSprint.startDate)
+        "
+        class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        <ng-icon *ngIf="!savingSprint" name="lucideCheck" class="w-4 h-4"></ng-icon>
+        <ng-icon *ngIf="savingSprint" name="lucideLoader" class="w-4 h-4 animate-spin"></ng-icon>
+        {{ savingSprint ? 'Creating…' : 'Create Sprint' }}
+      </button>
+    </div>
+  </form>
+</div>
+
 
   <!-- 🗂️ Task Board -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">

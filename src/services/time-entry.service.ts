@@ -40,12 +40,22 @@ export class TimeEntryService {
   }
 
   // ✅ Delete a single entry
-  deleteEntry(entryId: string): Observable<boolean> {
-    return this.http.delete<boolean>(`${this.apiUrl}/delete/${entryId}`);
+
+  // time-entry.service.ts
+  deleteEntry(id: string) {
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 
-  // ✅ Delete all entries
-  deleteAll(): Observable<{ deleted: number }> {
-    return this.http.delete<{ deleted: number }>(`${this.apiUrl}/delete-all`);
+  deleteAll() {
+    return this.http.delete<void>(`${this.apiUrl}/delete-all`);
   }
+
+  // deleteEntry(entryId: string): Observable<boolean> {
+  //   return this.http.delete<boolean>(`${this.apiUrl}/delete/${entryId}`);
+  // }
+
+  // ✅ Delete all entries
+  // deleteAll(): Observable<{ deleted: number }> {
+  //   return this.http.delete<{ deleted: number }>(`${this.apiUrl}/delete-all`);
+  // }
 }

@@ -19,12 +19,14 @@ export class SprintService {
 
   */
   
-  //private readonly apiUrl = 'https://localhost:7224/api/sprints';
+  private readonly apiUrl = 'https://localhost:7224/api/sprints';
   
   
   // this is the prod api
+
   private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
   private readonly apiUrl =  `${this.api}/api/sprints`;
+
 
   constructor(private http: HttpClient) {}
 

@@ -19,13 +19,13 @@ export class AuthService {
 
   */
 
-  //private baseUrl = 'https://localhost:7224/api/auth';
+  private baseUrl = 'https://localhost:7224/api/auth';
   
   
-  private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
+  //private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
   
 
-  private readonly baseUrl =  `${this.api}/api/auth`;
+  //private readonly baseUrl =  `${this.api}/api/auth`;
 
 
   constructor(private http: HttpClient) {}

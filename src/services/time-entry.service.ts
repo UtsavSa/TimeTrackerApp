@@ -17,9 +17,9 @@ export class TimeEntryService {
 
   //private readonly apiUrl = 'https://localhost:7224/api/timeentry';
   
-  
 
   // prod setting
+
   private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
   private readonly apiUrl =  `${this.api}/api/timeentry`;
   constructor(private http: HttpClient) {}

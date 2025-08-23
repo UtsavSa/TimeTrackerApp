@@ -28,12 +28,12 @@ export class DashboardTaskService {
   This is used solely for localhost dev testing purposes.
 
   */
-  //private readonly apiUrl = 'https://localhost:7224/api/dashboardtasks';
+  private readonly apiUrl = 'https://localhost:7224/api/dashboardtasks';
   
   
 
-  private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
-  private readonly apiUrl =  `${this.api}/api/dashboardtasks`;
+  //private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
+  //private readonly apiUrl =  `${this.api}/api/dashboardtasks`;
 
   constructor(private http: HttpClient) {}
 

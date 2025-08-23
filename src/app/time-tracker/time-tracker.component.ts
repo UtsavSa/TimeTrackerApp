@@ -153,8 +153,8 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
       next: (entries) => {
         this.entries = entries.map(entry => ({
           ...entry,
-          punchInTime: entry.punchInTime ? new Date(entry.punchInTime) : undefined,
-          punchOutTime: entry.punchOutTime ? new Date(entry.punchOutTime) : undefined,
+          punchInTime: this.parseServerInstant(entry.punchInTime as any),
+          punchOutTime: this.parseServerInstant(entry.punchOutTime as any),
         }));
         this.activeEntry = this.entries.find(e => !e.punchOutTime) || null;
         if (this.activeEntry?.punchInTime) this.startLiveTimer();
@@ -165,6 +165,20 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
       },
     });
   }
+
+  // time-tracker.component.ts (inside the class)
+private parseServerInstant(v?: string | Date | null): Date | undefined {
+  if (!v) return undefined;
+  if (v instanceof Date) return isNaN(v.getTime()) ? undefined : v;
+
+  const s = String(v).trim();
+  // If it already has Z or an explicit offset like +05:30, use as-is.
+  const hasTZ = /Z|[+-]\d{2}:\d{2}$/.test(s);
+  const iso = hasTZ ? s : `${s}Z`; // assume UTC when missing
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? undefined : d;
+}
+
 
   punchIn() {
     if (!this.taskName.trim()) {
@@ -177,7 +191,7 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
         this.taskName = '';
         this.activeEntry = {
           ...entry,
-          punchInTime: entry.punchInTime ? new Date(entry.punchInTime) : undefined
+          punchInTime: this.parseServerInstant(entry.punchInTime as any)
         };
         this.startLiveTimer();
         this.toastr.success('Punched in successfully.', 'Punch In');
@@ -249,11 +263,11 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
   }
 
   getDuration(start: Date | string | undefined, end: Date | string | undefined): string {
-    if (!start || !end) return '—';
-    const startTime = new Date(start).getTime();
-    const endTime = new Date(end).getTime();
-    const diff = endTime - startTime;
-    const minutes = Math.floor(diff / 60000);
+    const s = this.parseServerInstant(start as any);
+    const e = this.parseServerInstant(end as any);
+    if (!s || !e) return '—';
+    const diff = e.getTime() - s.getTime();
+    const minutes = Math.max(0, Math.floor(diff / 60000));
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return `${hours}h ${remainingMinutes}m`;
@@ -263,9 +277,9 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
     clearInterval(this.intervalRef);
     this.intervalRef = setInterval(() => {
       if (this.activeEntry?.punchInTime) {
-        const start = new Date(this.activeEntry.punchInTime).getTime();
-        const now = Date.now();
-        const totalSeconds = Math.floor((now - start) / 1000);
+        const start = this.parseServerInstant(this.activeEntry.punchInTime as any)?.getTime();
+        if (!start) return;
+        const totalSeconds = Math.max(0, Math.floor((Date.now() - start) / 1000)); // 👈 clamp to 0
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
@@ -274,6 +288,7 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  
   pad(num: number): string {
     return num.toString().padStart(2, '0');
   }

@@ -558,6 +558,8 @@ import { CreateSprintDto } from '../models/create-sprint-dto.model';
 import { AddTaskPopoverComponent } from './components/add-task-popover/add-task-popover.component';
 import { TaskDetailsComponent } from './components/task-details/task-details.component';
 
+import { NgIcon } from '@ng-icons/core';
+
 @Component({
   standalone: true,
   selector: 'app-dashboard',
@@ -566,6 +568,7 @@ import { TaskDetailsComponent } from './components/task-details/task-details.com
     FormsModule,
     AddTaskPopoverComponent,
     TaskDetailsComponent,
+    NgIcon,
   ],
   templateUrl: './dashboard.component.html',
 })
@@ -580,10 +583,17 @@ export class DashboardComponent implements OnInit {
   selectedSprintUserEmails: string[] = [];
   isSprintCreator: boolean = false;
 
+  readonly MAX_SPRINT_NAME = 40;
+  readonly NAME_WARN_THRESHOLD = 30;
+
   creatingSprint = false;
   newSprint: CreateSprintDto = { name: '', startDate: '', endDate: '' };
   inviteEmail: string = '';
   addTaskStatus: 'todo' | 'in-progress' | 'done' | null = null;
+
+
+  savingSprint = false;
+  todayStr = new Date().toISOString().slice(0, 10);
 
   constructor(
     private taskService: DashboardTaskService,
@@ -677,24 +687,64 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  onSprintNameInput() {
+    const n = this.newSprint.name || '';
+    if (n.length > this.MAX_SPRINT_NAME) {
+      this.newSprint.name = n.slice(0, this.MAX_SPRINT_NAME);
+    }
+  }
+
+  // createSprint(): void {
+  //   const { name, startDate, endDate } = this.newSprint;
+  //   if (!name || !startDate || !endDate) {
+  //     this.toastr.warning('⚠️ Fill in all sprint fields');
+  //     return;
+  //   }
+
+  //   this.sprintService.createSprint(this.newSprint).subscribe({
+  //     next: (sprint) => {
+  //       this.sprints.push(sprint);
+  //       this.selectSprint(sprint.id);
+  //       this.creatingSprint = false;
+  //       this.newSprint = { name: '', startDate: '', endDate: '' };
+  //       this.toastr.success('✅ Sprint created');
+  //     },
+  //     error: () => this.toastr.error('❌ Failed to create sprint'),
+  //   });
+  // }
+
   createSprint(): void {
-    const { name, startDate, endDate } = this.newSprint;
+    const name = (this.newSprint.name || '').trim();
+    const { startDate, endDate } = this.newSprint;
+
     if (!name || !startDate || !endDate) {
       this.toastr.warning('⚠️ Fill in all sprint fields');
       return;
     }
+    if (name.length > this.MAX_SPRINT_NAME) {
+      this.toastr.warning(`⚠️ Sprint name must be ≤ ${this.MAX_SPRINT_NAME} characters`);
+      return;
+    }
+
+    this.savingSprint = true;
+    this.newSprint.name = name;
 
     this.sprintService.createSprint(this.newSprint).subscribe({
       next: (sprint) => {
+        this.savingSprint = false;
         this.sprints.push(sprint);
         this.selectSprint(sprint.id);
         this.creatingSprint = false;
         this.newSprint = { name: '', startDate: '', endDate: '' };
         this.toastr.success('✅ Sprint created');
       },
-      error: () => this.toastr.error('❌ Failed to create sprint'),
+      error: () => {
+        this.savingSprint = false;
+        this.toastr.error('❌ Failed to create sprint');
+      },
     });
   }
+
 
   deleteSprint(): void {
     if (!this.selectedSprint) return;
@@ -800,4 +850,72 @@ export class DashboardComponent implements OnInit {
   onSprintChange(sprintId: string): void {
     this.selectSprint(sprintId);
   }
+
+  // adding the sprintDate feature
+
+  // --- Date utils ---
+private parseDate(dateStr: string): Date {
+  // Accept "YYYY-MM-DD" or ISO strings
+  let d = new Date(dateStr);
+  if (isNaN(d.getTime())) d = new Date(`${dateStr}T00:00:00`);
+  return d;
+}
+private startOfDay(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+formatDate(dateStr?: string | null): string {
+  if (!dateStr) return '—';
+  const d = this.parseDate(dateStr);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// --- Computed sprint info ---
+get sprintProgressPercent(): number {
+  const s = this.selectedSprint;
+  if (!s?.startDate || !s?.endDate) return 0;
+
+  const start = this.startOfDay(this.parseDate(s.startDate));
+  const end = this.startOfDay(this.parseDate(s.endDate));
+  const today = this.startOfDay(new Date());
+
+  const total = end.getTime() - start.getTime();
+  if (total <= 0) return 100;
+
+  const elapsed = today.getTime() - start.getTime();
+  const pct = (elapsed / total) * 100;
+
+  return Math.max(0, Math.min(100, Math.round(pct)));
+}
+get sprintDaysLeftText(): string {
+  const s = this.selectedSprint;
+  if (!s?.startDate || !s?.endDate) return '';
+
+  const start = this.startOfDay(this.parseDate(s.startDate));
+  const end = this.startOfDay(this.parseDate(s.endDate));
+  const today = this.startOfDay(new Date());
+
+  const DAY = 24 * 60 * 60 * 1000;
+
+  if (today < start) {
+    const days = Math.max(0, Math.round((start.getTime() - today.getTime()) / DAY));
+    return `Starts in ${days} day${days === 1 ? '' : 's'}`;
+  }
+  if (today > end) {
+    const days = Math.max(0, Math.round((today.getTime() - end.getTime()) / DAY));
+    return `Ended ${days} day${days === 1 ? '' : 's'} ago`;
+  }
+  // during sprint (inclusive of today)
+  const daysLeft = Math.max(0, Math.round((end.getTime() - today.getTime()) / DAY));
+  return `${daysLeft} day${daysLeft === 1 ? '' : 's'} left`;
+}
+
+
+get nameLen(): number {
+  return this.newSprint.name.length; // always a string in your model
+}
+
+
 }

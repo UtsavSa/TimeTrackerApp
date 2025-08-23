@@ -222,22 +222,44 @@ private parseServerInstant(v?: string | Date | null): Date | undefined {
     });
   }
 
-  deleteEntry(entryId: string) {
-    if (this.activeEntry?.id === entryId) {
+  // deleteEntry(entryId: string) {
+  //   if (this.activeEntry?.id === entryId) {
+  //     this.toastr.warning('Punch out before deleting this task.', 'Action Blocked');
+  //     return;
+  //   }
+
+  //   this.timeEntryService.deleteEntry(entryId).subscribe({
+  //     next: (success) => {
+  //       if (success) {
+  //         this.entries = this.entries.filter(e => e.id !== entryId);
+  //         this.toastr.success('Task deleted successfully.', 'Task Removed');
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error('Delete failed:', err);
+  //       this.toastr.error('Failed to delete task.', 'Error');
+  //     },
+  //   });
+  // }
+
+  deleteEntry(entryId: string){
+
+    if (this.activeEntry?.id === entryId){
+
       this.toastr.warning('Punch out before deleting this task.', 'Action Blocked');
       return;
     }
 
     this.timeEntryService.deleteEntry(entryId).subscribe({
-      next: (success) => {
-        if (success) {
-          this.entries = this.entries.filter(e => e.id !== entryId);
-          this.toastr.success('Task deleted successfully.', 'Task Removed');
-        }
+      next: () => {
+
+        this.entries = this.entries.filter(e => e.id !== entryId);
+        this.toastr.success("Task deleted successfully.", 'Task Removed');
       },
       error: (err) => {
         console.error('Delete failed:', err);
-        this.toastr.error('Failed to delete task.', 'Error');
+        this.toastr.error('Failed to delete task.', "Error");
+
       },
     });
   }

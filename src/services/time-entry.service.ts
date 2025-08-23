@@ -8,8 +8,19 @@ import { environment } from '../environments/environment';
   providedIn: 'root',
 })
 export class TimeEntryService {
+
+  /* 
+  
+  This is used solely for localhost dev testing purposes.
+
+  */
+
   //private readonly apiUrl = 'https://localhost:7224/api/timeentry';
+  
+  
   //private readonly apiUrl = `${environment.apiUrl}/api/timeentry`; // ✅ Use env
+  
+  // prod setting
   private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
   private readonly apiUrl =  `${this.api}/api/timeentry`;
   constructor(private http: HttpClient) {}

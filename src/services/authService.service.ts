@@ -12,9 +12,20 @@ type AuthResponse = {token: string};
   providedIn: 'root'
 })
 export class AuthService {
+
+  /* 
+  
+  This is used solely for localhost dev testing purposes.
+
+  */
+
   //private baseUrl = 'https://localhost:7224/api/auth';
+  
+  
   private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
-  //private readonly baseUrl = `${environment.apiUrl}/api/auth`; // ✅ Updated
+  
+  // private readonly baseUrl = `${environment.apiUrl}/api/auth`; // ✅ Updated
+
   private readonly baseUrl =  `${this.api}/api/auth`;
 
 

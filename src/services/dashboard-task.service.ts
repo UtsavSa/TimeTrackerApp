@@ -22,12 +22,18 @@ type AuthResponse = {token: string};
   providedIn: 'root',
 })
 export class DashboardTaskService {
+
+  /* 
+  
+  This is used solely for localhost dev testing purposes.
+
+  */
   //private readonly apiUrl = 'https://localhost:7224/api/dashboardtasks';
+  
+  
   //private readonly apiUrl = `${environment.apiUrl}/api/dashboardtasks`; // 👈 Use env
 
-    //private baseUrl = 'https://localhost:7224/api/auth';
   private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
-  //private readonly baseUrl = `${environment.apiUrl}/api/auth`; // ✅ Updated
   private readonly apiUrl =  `${this.api}/api/dashboardtasks`;
 
   constructor(private http: HttpClient) {}

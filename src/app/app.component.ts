@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './header/header.component';
-import { DashboardComponent } from './dashboard.component';
+//import { DashboardComponent } from './dashboard.component';
 import { FormsModule } from '@angular/forms';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,8 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
     RouterModule,
     HeaderComponent,
     FormsModule,
-    DashboardComponent,
+    //DashboardComponent,
+    
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

@@ -20,7 +20,7 @@ export class TimeEntryService {
   
   
   
-  // new env change
+
   // prod setting
   private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
   private readonly apiUrl =  `${this.api}/api/timeentry`;

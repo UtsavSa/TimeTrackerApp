@@ -1,11 +1,3 @@
-// src/app/models/sprint.model.ts
-// export interface Sprint {
-//   id: string;
-//   name: string;
-//   startDate: string;
-//   endDate: string;
-//   createdByUserName?: string;
-// }
 
 
 // src/app/models/sprint.model.ts

@@ -9,3 +9,13 @@ html, body {
   min-height: 100%;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+
+/* Selection */
+::selection { background: rgba(56,189,248,.35); } /* sky-400/35 */
+.dark ::selection { background: rgba(56,189,248,.45); }
+
+/* Minimal scrollbar (Chromium/WebKit) */
+*::-webkit-scrollbar { height: 10px; width: 10px; }
+*::-webkit-scrollbar-thumb { background: rgba(148,163,184,.35); border-radius: 9999px; } /* slate-400/35 */
+.dark *::-webkit-scrollbar-thumb { background: rgba(148,163,184,.5); }

@@ -30,7 +30,6 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 }
 
-// ✅ This is what you're missing
 export const AuthInterceptorProvider = {
   provide: HTTP_INTERCEPTORS,
   useClass: AuthInterceptor,

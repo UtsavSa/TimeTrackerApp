@@ -15,13 +15,13 @@ export class TimeEntryService {
 
   */
 
-  private readonly apiUrl = 'https://localhost:7224/api/timeentry';
-  
-  
-  
-  // prod setting
-  //private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
-  //private readonly apiUrl =  `${this.api}/api/timeentry`;
+
+  //private readonly apiUrl = 'https://localhost:7224/api/timeentry';
+
+
+  private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
+  private readonly apiUrl =  `${this.api}/api/timeentry`;
+
   constructor(private http: HttpClient) {}
 
   // ✅ Punch In (with JSON body)
@@ -42,12 +42,22 @@ export class TimeEntryService {
   }
 
   // ✅ Delete a single entry
-  deleteEntry(entryId: string): Observable<boolean> {
-    return this.http.delete<boolean>(`${this.apiUrl}/delete/${entryId}`);
+
+  // time-entry.service.ts
+  deleteEntry(id: string) {
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 
-  // ✅ Delete all entries
-  deleteAll(): Observable<{ deleted: number }> {
-    return this.http.delete<{ deleted: number }>(`${this.apiUrl}/delete-all`);
+  deleteAll() {
+    return this.http.delete<void>(`${this.apiUrl}/delete-all`);
   }
+
+  // deleteEntry(entryId: string): Observable<boolean> {
+  //   return this.http.delete<boolean>(`${this.apiUrl}/delete/${entryId}`);
+  // }
+
+  // ✅ Delete all entries
+  // deleteAll(): Observable<{ deleted: number }> {
+  //   return this.http.delete<{ deleted: number }>(`${this.apiUrl}/delete-all`);
+  // }
 }

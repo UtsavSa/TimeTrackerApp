@@ -22,9 +22,6 @@ export class AuthService {
   //private baseUrl = 'https://localhost:7224/api/auth';
   
   
-
-  // prod api n
-  
   private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
   
 

@@ -1,0 +1,3 @@
+:host { display:block; }
+/* smoother color changes when toggling dark mode */
+section, button { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }

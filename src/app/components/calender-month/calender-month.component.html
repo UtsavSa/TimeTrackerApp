@@ -1,0 +1,77 @@
+<section class="bg-white rounded-2xl shadow p-4 dark:bg-slate-900 dark:shadow-black/20 transition-colors">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+        (click)="prevMonth()"
+        aria-label="Previous month"
+      >
+        &larr;
+      </button>
+
+      <h2 class="text-lg font-semibold select-none">
+        {{ monthLabel() }}
+      </h2>
+
+      <button
+        type="button"
+        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+        (click)="nextMonth()"
+        aria-label="Next month"
+      >
+        &rarr;
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="px-3 py-1.5 rounded-lg border text-sm
+             border-gray-200 hover:bg-gray-50 text-gray-700
+             dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+      (click)="goToday()"
+    >
+      Today
+    </button>
+  </div>
+
+  <!-- Weekday headings -->
+  <div class="grid grid-cols-7 text-xs font-medium mb-2 text-gray-500 dark:text-slate-400">
+    <div class="text-center">S</div>
+    <div class="text-center">M</div>
+    <div class="text-center">T</div>
+    <div class="text-center">W</div>
+    <div class="text-center">T</div>
+    <div class="text-center">F</div>
+    <div class="text-center">S</div>
+  </div>
+
+  <!-- Month grid (6x7) -->
+  <div
+    class="grid grid-cols-7 gap-1"
+    role="grid"
+    [attr.aria-label]="monthLabel() + ' calendar'"
+  >
+    <button
+      *ngFor="let d of grid()"
+      type="button"
+      role="gridcell"
+      class="aspect-square rounded-xl border text-sm flex items-center justify-center transition
+             focus:outline-none focus:ring-2 focus:ring-sky-500
+             border-gray-200 dark:border-slate-800
+             bg-white dark:bg-slate-900
+             hover:bg-gray-50 dark:hover:bg-slate-800"
+      [ngClass]="{
+        'bg-gray-50 text-gray-400': !d.inMonth,
+        'dark:bg-slate-800/60 dark:text-slate-500': !d.inMonth,
+        'ring-2 ring-sky-500': d.isToday
+      }"
+      [attr.aria-current]="d.isToday ? 'date' : null"
+      [attr.aria-label]="d.date.toDateString()"
+      (click)="openJournal(d.date)"
+    >
+      {{ d.date.getDate() }}
+    </button>
+  </div>
+</section>

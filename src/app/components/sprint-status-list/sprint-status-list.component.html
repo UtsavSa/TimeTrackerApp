@@ -1,0 +1,53 @@
+<section class="bg-white rounded-2xl shadow p-4 dark:bg-slate-900 dark:shadow-black/20 transition-colors">
+  <header class="flex items-center justify-between mb-3">
+    <h2 class="text-lg font-semibold">Your Sprints</h2>
+  </header>
+
+  <ng-container *ngIf="items?.length; else empty">
+    <ul class="space-y-3">
+      <li *ngFor="let it of items; trackBy: trackById">
+        <div
+          class="rounded-xl border p-3 bg-white dark:bg-slate-900
+                 border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+        >
+          <div class="flex items-center justify-between">
+            <div class="font-medium">{{ it.sprint.name }}</div>
+            <div class="text-xs text-gray-500 dark:text-slate-400">
+              {{ it.sprint.startDate | date:'MMM d' }} – {{ it.sprint.endDate | date:'MMM d' }}
+            </div>
+          </div>
+
+          <!-- Completion bar with time marker -->
+          <div class="mt-2 relative">
+            <div class="w-full h-2.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-blue-500 dark:bg-sky-500" [style.width.%]="completionPct(it)"></div>
+            </div>
+            <!-- time elapsed marker -->
+            <div class="absolute top-1/2 -translate-y-1/2"
+                 [style.left.%]="timePct(it)"
+                 style="width:2px; height:14px; background: rgba(0,0,0,0.25);"
+                 class="dark:!bg-white/30"></div>
+          </div>
+
+          <div class="mt-1.5 text-xs flex items-center justify-between">
+            <span class="text-gray-600 dark:text-slate-300">
+              {{ it.doneStoryPoints }}/{{ it.sprint.totalStoryPoints }} pts
+            </span>
+            <span class="font-medium"
+                  [class.text-red-500]="behindPace(it)"
+                  [class.text-green-600]="!behindPace(it)">
+              {{ completionPct(it) | number:'1.0-0' }}%
+              <span class="ml-1" *ngIf="behindPace(it)">• behind pace</span>
+            </span>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </ng-container>
+
+  <ng-template #empty>
+    <div class="text-sm text-gray-500 dark:text-slate-400">
+      No active sprints yet.
+    </div>
+  </ng-template>
+</section>

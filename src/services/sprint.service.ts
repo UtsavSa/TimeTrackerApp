@@ -1,10 +1,10 @@
-// src/app/services/sprint.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Sprint } from '../models/sprint.model';
 import { CreateSprintDto } from '../models/create-sprint-dto.model';
 import { environment } from '../environments/environment';
+import { SprintProgress } from '../models/sprint-progress.model';
 
 
 
@@ -23,6 +23,7 @@ export class SprintService {
   
   
   // this is the prod api
+
 
   private readonly api = (environment.apiUrl ?? '').replace(/\/+$/, '');
   private readonly apiUrl =  `${this.api}/api/sprints`;
@@ -53,5 +54,10 @@ export class SprintService {
   // Get list of user emails in a sprint
   getSprintUsers(sprintId: string): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/${sprintId}/users`);
+  }
+
+  // NEW: get completed story points per sprint for the current user
+  getMySprintProgress() {
+    return this.http.get<SprintProgress[]>(`${this.apiUrl}/mine/progress`);
   }
 }
